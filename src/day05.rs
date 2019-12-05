@@ -165,6 +165,7 @@ impl Computer {
     }
 }
 
+#[cfg(test)]
 mod tests {
     #[test]
     fn test_execute() {

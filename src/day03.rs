@@ -10,13 +10,11 @@ struct Point {
 }
 
 impl Point {
-    #[allow(dead_code)]
     fn manhattan_distance(&self, other: &Point) -> i32 {
         i32::abs(self.x - other.x) + i32::abs(self.y - other.y)
     }
 }
 
-#[allow(dead_code)]
 fn wire_path(path: &str) -> HashMap<Point, i32> {
     let directions = path.split(',');
     let mut result: HashMap<Point, i32> = HashMap::new();
@@ -93,6 +91,7 @@ fn shortest_signal_time(wire_a: &str, wire_b: &str) -> i32 {
         .unwrap()
 }
 
+#[cfg(test)]
 mod tests {
     #[test]
     fn test_shortest_cross() {

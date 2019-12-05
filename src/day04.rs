@@ -1,4 +1,4 @@
-
+#[allow(dead_code)]
 fn number_of_passwords(start: i32, end: i32, password_validator: &dyn Fn(i32)->bool) -> i32 {
     let mut result = 0;
     for i in start ..= end {
@@ -8,11 +8,14 @@ fn number_of_passwords(start: i32, end: i32, password_validator: &dyn Fn(i32)->b
     }
     result
 }
+
+#[allow(dead_code)]
 fn is_valid_password(password: i32) -> bool {
     let digits = split_digits(password);
     doublet_exists(&digits) && is_increasing(&digits)
 }
 
+#[allow(dead_code)]
 fn is_valid_password_2(password: i32) -> bool {
     let digits = split_digits(password);
     exact_doublet_exists(&digits) && is_increasing(&digits) 
@@ -73,6 +76,7 @@ fn exact_doublet_exists(digits: &[i32]) -> bool {
     false
 }
 
+#[cfg(test)]
 mod tests {
     #[test]
     fn test_valid_password() {

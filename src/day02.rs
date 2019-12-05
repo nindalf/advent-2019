@@ -7,7 +7,6 @@ enum Instruction {
     Stop = 99,
 }
 
-#[allow(dead_code)]
 fn compute(instruction: Instruction, op_1: u32, op_2: u32) -> u32 {
     match instruction {
         Instruction::Addition => op_1 + op_2,
@@ -16,7 +15,6 @@ fn compute(instruction: Instruction, op_1: u32, op_2: u32) -> u32 {
     }
 }
 
-#[allow(dead_code)]
 fn compute_instructions(input: &[u32]) -> Vec<u32> {
     let mut counter: usize = 0;
     let mut results = input.to_vec();
@@ -51,6 +49,7 @@ fn exhaustive_search(input: &[u32], desired_result: u32) -> u32 {
     0
 }
 
+#[cfg(test)]
 mod tests {
     #[test]
     fn test_computer() {
