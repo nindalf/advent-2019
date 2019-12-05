@@ -1,6 +1,6 @@
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
-#[derive(PartialEq, Copy, Clone)]
+#[derive(Copy, Clone)]
 enum Instruction {
     Addition(Parameter, Parameter, Parameter),
     Multiplication(Parameter, Parameter, Parameter),
@@ -13,7 +13,7 @@ enum Instruction {
     Stop,
 }
 
-#[derive(FromPrimitive, PartialEq, Copy, Clone)]
+#[derive(FromPrimitive, Copy, Clone)]
 enum Parameter {
     Position = 0,
     Immediate = 1,
@@ -65,44 +65,43 @@ impl Computer {
         let instruction = Instruction::new(self.input[self.counter]);
         self.counter += 1;
         match instruction {
-            Some(instruction) => {
-                match instruction {
-                    Instruction::Addition(param_1, param_2, _) => {
-                        self.op_1 = self.compute_operand(param_1);
-                        self.op_2 = self.compute_operand(param_2);
-                        self.compute_destination()
-                    }
-                    Instruction::Multiplication(param_1, param_2, _) => {
-                        self.op_1 = self.compute_operand(param_1);
-                        self.op_2 = self.compute_operand(param_2);
-                        self.compute_destination()
-                    }
-                    Instruction::Input(_) => self.compute_destination(),
-                    Instruction::Output(_) => self.compute_destination(),
-                    Instruction::JumpIfTrue(param_1, param_2) => {
-                        self.op_1 = self.compute_operand(param_1);
-                        self.op_2 = self.compute_operand(param_2);
-                    },
-                    Instruction::JumpIfFalse(param_1, param_2) => {
-                        self.op_1 = self.compute_operand(param_1);
-                        self.op_2 = self.compute_operand(param_2);
-                    },
-                    Instruction::LessThan(param_1, param_2, _) => {
-                        self.op_1 = self.compute_operand(param_1);
-                        self.op_2 = self.compute_operand(param_2);
-                        self.compute_destination()
-                    },
-                    Instruction::Equals(param_1, param_2, _) => {
-                        self.op_1 = self.compute_operand(param_1);
-                        self.op_2 = self.compute_operand(param_2);
-                        self.compute_destination()
-                    }
-                    Instruction::Stop => {},
+            Some(instruction) => match instruction {
+                Instruction::Addition(param_1, param_2, _) => {
+                    self.compute_two_operands_and_destination(param_1, param_2)
                 }
-            }
+                Instruction::Multiplication(param_1, param_2, _) => {
+                    self.compute_two_operands_and_destination(param_1, param_2)
+                }
+                Instruction::Input(_) => self.compute_destination(),
+                Instruction::Output(_) => self.compute_destination(),
+                Instruction::JumpIfTrue(param_1, param_2) => {
+                    self.compute_two_operands(param_1, param_2)
+                }
+                Instruction::JumpIfFalse(param_1, param_2) => {
+                    self.compute_two_operands(param_1, param_2)
+                }
+                Instruction::LessThan(param_1, param_2, _) => {
+                    self.compute_two_operands_and_destination(param_1, param_2)
+                }
+                Instruction::Equals(param_1, param_2, _) => {
+                    self.compute_two_operands_and_destination(param_1, param_2)
+                }
+                Instruction::Stop => {}
+            },
             None => {}
         };
         instruction
+    }
+
+    fn compute_two_operands_and_destination(&mut self, param_1: Parameter, param_2: Parameter) {
+        self.op_1 = self.compute_operand(param_1);
+        self.op_2 = self.compute_operand(param_2);
+        self.compute_destination()
+    }
+
+    fn compute_two_operands(&mut self, param_1: Parameter, param_2: Parameter) {
+        self.op_1 = self.compute_operand(param_1);
+        self.op_2 = self.compute_operand(param_2);
     }
 
     fn compute_operand(&mut self, parameter: Parameter) -> i32 {
@@ -125,40 +124,40 @@ impl Computer {
             match instruction {
                 Instruction::Addition(_, _, _) => {
                     self.input[self.destination] = self.op_1 + self.op_2;
-                },
+                }
                 Instruction::Multiplication(_, _, _) => {
                     self.input[self.destination] = self.op_1 * self.op_2;
-                },
+                }
                 Instruction::Input(_) => {
                     self.input[self.destination] = input;
-                },
+                }
                 Instruction::Output(_) => {
                     self.output.push(self.input[self.destination]);
-                },
+                }
                 Instruction::JumpIfTrue(_, _) => {
                     if self.op_1 != 0 {
                         self.counter = self.op_2 as usize;
                     }
-                },
+                }
                 Instruction::JumpIfFalse(_, _) => {
                     if self.op_1 == 0 {
                         self.counter = self.op_2 as usize;
                     }
-                },
+                }
                 Instruction::LessThan(_, _, _) => {
                     if self.op_1 < self.op_2 {
                         self.input[self.destination] = 1;
                     } else {
                         self.input[self.destination] = 0;
                     }
-                },
+                }
                 Instruction::Equals(_, _, _) => {
                     if self.op_1 == self.op_2 {
                         self.input[self.destination] = 1;
                     } else {
                         self.input[self.destination] = 0;
                     }
-                },
+                }
                 Instruction::Stop => return,
             };
         }
@@ -173,7 +172,7 @@ mod tests {
         let mut computer = super::Computer::new(&input);
         computer.compute(1);
         assert_eq!(computer.output[computer.output.len() - 1], 16489636);
-        
+
         let mut computer = super::Computer::new(&input);
         computer.compute(5);
         assert_eq!(computer.output[computer.output.len() - 1], 9386583);
