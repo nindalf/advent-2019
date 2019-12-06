@@ -7,6 +7,21 @@ enum Instruction {
     Stop = 99,
 }
 
+pub fn exhaustive_search(input: &[u32], desired_result: u32) -> Option<u32> {
+    let mut mut_input = input.to_vec();
+    for noun in 0..100 {
+        for verb in 0..100 {
+            mut_input[1] = noun;
+            mut_input[2] = verb;
+            let computed_result = compute_instructions(&mut_input)[0];
+            if computed_result == desired_result {
+                return Some(100 * noun + verb);
+            }
+        }
+    }
+    None
+}
+
 fn compute(instruction: Instruction, op_1: u32, op_2: u32) -> u32 {
     match instruction {
         Instruction::Addition => op_1 + op_2,
@@ -33,22 +48,6 @@ fn compute_instructions(input: &[u32]) -> Vec<u32> {
     results
 }
 
-#[allow(dead_code)]
-fn exhaustive_search(input: &[u32], desired_result: u32) -> Option<u32> {
-    let mut mut_input = input.to_vec();
-    for noun in 0..100 {
-        for verb in 0..100 {
-            mut_input[1] = noun;
-            mut_input[2] = verb;
-            let computed_result = compute_instructions(&mut_input)[0];
-            if computed_result == desired_result {
-                return Some(100 * noun + verb);
-            }
-        }
-    }
-    None
-}
-
 #[cfg(test)]
 mod tests {
     #[test]
@@ -58,7 +57,7 @@ mod tests {
         assert_eq!(super::compute_instructions(&input), expected);
 
         let input = vec![1, 0, 0, 0, 99];
-        let expected =  vec![2, 0, 0, 0, 99];
+        let expected = vec![2, 0, 0, 0, 99];
         assert_eq!(super::compute_instructions(&input), expected);
 
         let input = vec![2, 3, 0, 3, 99];

@@ -8,6 +8,17 @@ struct CelestialBody {
     parent: Option<u32>,
 }
 
+pub fn number_of_orbits(orbits: &[String]) -> u32 {
+    steps_from_origin(orbits, hash("COM")).values().sum()
+}
+
+pub fn steps_to_santa(orbits: &[String]) -> u32 {
+    steps_from_origin(orbits, hash("YOU"))
+        .get(&hash("SAN"))
+        .unwrap()
+        - 2
+}
+
 fn hash(input: &str) -> u32 {
     let mut hash = 0;
     for (i, c) in input.chars().enumerate() {
@@ -19,7 +30,6 @@ fn hash(input: &str) -> u32 {
 fn get_graph(orbits: &[String]) -> HashMap<u32, CelestialBody> {
     let mut celestial_objs: HashMap<u32, CelestialBody> = HashMap::new();
     for orbit in orbits {
-        
         let mut objects = orbit.split(')');
         let left = hash(objects.next().unwrap());
         let right = hash(objects.next().unwrap());
@@ -38,16 +48,6 @@ fn get_graph(orbits: &[String]) -> HashMap<u32, CelestialBody> {
     celestial_objs
 }
 
-#[allow(dead_code)]
-fn number_of_orbits(orbits: &[String]) -> u32 {
-    steps_from_origin(orbits, hash("COM")).values().sum()
-}
-
-#[allow(dead_code)]
-fn steps_to_santa(orbits: &[String]) -> u32 {
-    steps_from_origin(orbits, hash("YOU")).get(&hash("SAN")).unwrap() - 2
-}
-
 pub fn steps_from_origin(orbits: &[String], origin: u32) -> HashMap<u32, u32> {
     let celestial_objs = get_graph(orbits);
     let mut steps = 0;
@@ -55,7 +55,7 @@ pub fn steps_from_origin(orbits: &[String], origin: u32) -> HashMap<u32, u32> {
     let mut next_gen = VecDeque::new();
     let mut visited = HashMap::new();
     current_gen.push_back(origin);
-    
+
     while !current_gen.is_empty() || !next_gen.is_empty() {
         if current_gen.is_empty() {
             current_gen = next_gen;
@@ -97,7 +97,8 @@ mod tests {
     #[test]
     fn test_steps_to_santa() {
         let input: Vec<String> = vec![
-            "COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L", "K)YOU", "I)SAN"
+            "COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L", "K)YOU",
+            "I)SAN",
         ]
         .iter()
         .map(|s| s.to_string())
@@ -108,12 +109,14 @@ mod tests {
     }
 
     fn convert(input: Vec<String>) -> Vec<(u32, u32)> {
-        input.iter()
+        input
+            .iter()
             .map(|s| {
                 let mut objects = s.split(')');
                 let left = super::hash(objects.next().unwrap());
                 let right = super::hash(objects.next().unwrap());
                 (left, right)
-            }).collect()
+            })
+            .collect()
     }
 }

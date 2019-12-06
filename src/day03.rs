@@ -1,7 +1,6 @@
-
+use std::cmp;
 use std::collections::HashMap;
 use std::str::FromStr;
-use std::cmp;
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 struct Point {
@@ -28,16 +27,16 @@ fn wire_path(path: &str) -> HashMap<Point, i32> {
         let (mut end_x, mut end_y) = (x, y);
         match d {
             'R' => end_x += distance,
-            'U' => end_y += distance, 
+            'U' => end_y += distance,
             'D' => end_y -= distance,
-            'L' => end_x -= distance, 
+            'L' => end_x -= distance,
             _ => panic!("Unknown direction"),
         }
         let start_x = cmp::min(x, end_x);
         let start_y = cmp::min(y, end_y);
-        for i in start_x ..= cmp::max(x, end_x) {
-            for j in start_y ..= cmp::max(y, end_y) {
-                let point = Point{x: i, y: j};
+        for i in start_x..=cmp::max(x, end_x) {
+            for j in start_y..=cmp::max(y, end_y) {
+                let point = Point { x: i, y: j };
                 if result.contains_key(&point) {
                     continue;
                 }
@@ -49,15 +48,14 @@ fn wire_path(path: &str) -> HashMap<Point, i32> {
         x = end_x;
         y = end_y;
     }
-    result.remove(&Point{x:0, y:0});
+    result.remove(&Point { x: 0, y: 0 });
     result
 }
 
-#[allow(dead_code)]
-fn shortest_cross(wire_a: &str, wire_b: &str) -> i32 {
+pub fn shortest_cross(wire_a: &str, wire_b: &str) -> i32 {
     let path_a = wire_path(wire_a);
     let path_b = wire_path(wire_b);
-    
+
     let mut intersections = Vec::new();
     for (point, _) in path_a {
         if path_b.contains_key(&point) {
@@ -65,7 +63,7 @@ fn shortest_cross(wire_a: &str, wire_b: &str) -> i32 {
         }
     }
 
-    let origin = Point{x: 0, y: 0};
+    let origin = Point { x: 0, y: 0 };
     intersections
         .iter()
         .map(|point| point.manhattan_distance(&origin))
@@ -73,11 +71,10 @@ fn shortest_cross(wire_a: &str, wire_b: &str) -> i32 {
         .unwrap()
 }
 
-#[allow(dead_code)]
-fn shortest_signal_time(wire_a: &str, wire_b: &str) -> i32 {
+pub fn shortest_signal_time(wire_a: &str, wire_b: &str) -> i32 {
     let path_a = wire_path(wire_a);
     let path_b = wire_path(wire_b);
-    
+
     let mut intersections = Vec::new();
     for (point, signal_time) in path_a {
         if path_b.contains_key(&point) {
@@ -85,10 +82,7 @@ fn shortest_signal_time(wire_a: &str, wire_b: &str) -> i32 {
         }
     }
 
-    *intersections
-        .iter()
-        .min()
-        .unwrap()
+    *intersections.iter().min().unwrap()
 }
 
 #[cfg(test)]
@@ -119,13 +113,15 @@ mod tests {
         // assert_eq!(super::shortest_signal_time(input_2_a, input_2_b), 410);
 
         let real_input = crate::utils::read_lines("data/day03.txt").unwrap();
-        assert_eq!(super::shortest_signal_time(&real_input[0], &real_input[1]), 35038);
+        assert_eq!(
+            super::shortest_signal_time(&real_input[0], &real_input[1]),
+            35038
+        );
     }
 
     #[test]
     fn test_wire_path() {
         let input = "R75,D30,R83,U83,L12,D49,R71,U7,L72";
         super::wire_path(input);
-
     }
 }

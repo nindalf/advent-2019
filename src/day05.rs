@@ -39,7 +39,7 @@ impl Instruction {
     }
 }
 
-struct Computer {
+pub struct Computer {
     input: Vec<i32>,
     output: Vec<i32>,
     counter: usize,
@@ -49,8 +49,7 @@ struct Computer {
 }
 
 impl Computer {
-    #[allow(dead_code)]
-    fn new(input: &[i32]) -> Computer {
+    pub fn new(input: &[i32]) -> Computer {
         Computer {
             input: input.to_vec(),
             output: Vec::new(),
@@ -118,8 +117,7 @@ impl Computer {
         self.counter += 1;
     }
 
-    #[allow(dead_code)]
-    fn compute(&mut self, input: i32) {
+    pub fn compute(&mut self, input: i32) {
         while let Some(instruction) = self.next_instruction() {
             match instruction {
                 Instruction::Addition(_, _, _) => {
@@ -174,7 +172,7 @@ mod tests {
             .split(',')
             .map(|s| s.parse::<i32>().unwrap())
             .collect();
-            
+
         let mut computer = super::Computer::new(&input);
         computer.compute(1);
         assert_eq!(computer.output[computer.output.len() - 1], 16489636);
