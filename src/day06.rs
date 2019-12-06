@@ -2,21 +2,36 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
-#[derive(Debug)]
-struct CelestialBody {
-    satellites: HashSet<u32>,
-    parent: Option<u32>,
+#[aoc_generator(day6)]
+pub fn input_generator(input: &str) -> Vec<(u32, u32)> {
+    input
+        .lines()
+        .map(|s| {
+            let mut objects = s.trim().split(')');
+            let left = hash(objects.next().unwrap());
+            let right = hash(objects.next().unwrap());
+            (left, right)
+        })
+        .collect()
 }
 
-pub fn number_of_orbits(orbits: &[String]) -> u32 {
+#[aoc(day6, part1)]
+pub fn number_of_orbits(orbits: &[(u32, u32)]) -> u32 {
     steps_from_origin(orbits, hash("COM")).values().sum()
 }
 
-pub fn steps_to_santa(orbits: &[String]) -> u32 {
+#[aoc(day6, part2)]
+pub fn steps_to_santa(orbits: &[(u32, u32)]) -> u32 {
     steps_from_origin(orbits, hash("YOU"))
         .get(&hash("SAN"))
         .unwrap()
         - 2
+}
+
+#[derive(Debug)]
+struct CelestialBody {
+    satellites: HashSet<u32>,
+    parent: Option<u32>,
 }
 
 fn hash(input: &str) -> u32 {
@@ -27,28 +42,25 @@ fn hash(input: &str) -> u32 {
     hash
 }
 
-fn get_graph(orbits: &[String]) -> HashMap<u32, CelestialBody> {
+fn get_graph(orbits: &[(u32, u32)]) -> HashMap<u32, CelestialBody> {
     let mut celestial_objs: HashMap<u32, CelestialBody> = HashMap::new();
-    for orbit in orbits {
-        let mut objects = orbit.split(')');
-        let left = hash(objects.next().unwrap());
-        let right = hash(objects.next().unwrap());
-        let left_body = celestial_objs.entry(left).or_insert(CelestialBody {
+    for (left, right) in orbits {
+        let left_body = celestial_objs.entry(*left).or_insert(CelestialBody {
             satellites: HashSet::<u32>::new(),
             parent: None,
         });
-        left_body.satellites.insert(right);
+        left_body.satellites.insert(*right);
 
-        let right_body = celestial_objs.entry(right).or_insert(CelestialBody {
+        let right_body = celestial_objs.entry(*right).or_insert(CelestialBody {
             satellites: HashSet::<u32>::new(),
             parent: None,
         });
-        right_body.parent = Some(left);
+        right_body.parent = Some(*left);
     }
     celestial_objs
 }
 
-pub fn steps_from_origin(orbits: &[String], origin: u32) -> HashMap<u32, u32> {
+pub fn steps_from_origin(orbits: &[(u32, u32)], origin: u32) -> HashMap<u32, u32> {
     let celestial_objs = get_graph(orbits);
     let mut steps = 0;
     let mut current_gen = VecDeque::new();
@@ -82,41 +94,37 @@ pub fn steps_from_origin(orbits: &[String], origin: u32) -> HashMap<u32, u32> {
 mod tests {
     #[test]
     fn test_orbit() {
-        let input: Vec<String> = vec![
-            "COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L",
-        ]
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+        let input = "COM)B
+        B)C
+        C)D
+        D)E
+        E)F
+        B)G
+        G)H
+        D)I
+        E)J
+        J)K
+        K)L";
+        let input = super::input_generator(&input);
         assert_eq!(super::number_of_orbits(&input), 42);
-
-        let input = crate::utils::read_lines("data/day06.txt").unwrap();
-        assert_eq!(super::number_of_orbits(&input), 223251);
     }
 
     #[test]
     fn test_steps_to_santa() {
-        let input: Vec<String> = vec![
-            "COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L", "K)YOU",
-            "I)SAN",
-        ]
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+        let input = "COM)B
+        B)C
+        C)D
+        D)E
+        E)F
+        B)G
+        G)H
+        D)I
+        E)J
+        J)K
+        K)L
+        K)YOU
+        I)SAN";
+        let input = super::input_generator(&input);
         assert_eq!(super::steps_to_santa(&input), 4);
-        let input = crate::utils::read_lines("data/day06.txt").unwrap();
-        assert_eq!(super::steps_to_santa(&input), 430);
-    }
-
-    fn convert(input: Vec<String>) -> Vec<(u32, u32)> {
-        input
-            .iter()
-            .map(|s| {
-                let mut objects = s.split(')');
-                let left = super::hash(objects.next().unwrap());
-                let right = super::hash(objects.next().unwrap());
-                (left, right)
-            })
-            .collect()
     }
 }

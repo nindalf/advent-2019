@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader, Error, prelude::*};
+use std::io::{prelude::*, BufRead, BufReader, Error};
 
 #[allow(dead_code)]
 pub(crate) fn read_lines(path: &str) -> Result<Vec<String>, Error> {

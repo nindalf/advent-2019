@@ -2,6 +2,46 @@ use std::cmp;
 use std::collections::HashMap;
 use std::str::FromStr;
 
+#[aoc_generator(day3)]
+pub fn input_generator(input: &str) -> (String, String) {
+    let lines: Vec<&str> = input.lines().collect();
+    (lines[0].to_owned(), lines[1].to_owned())
+}
+
+#[aoc(day3, part1)]
+pub fn shortest_cross(wires: &(String, String)) -> i32 {
+    let path_a = wire_path(&wires.0);
+    let path_b = wire_path(&wires.1);
+
+    let mut intersections = Vec::new();
+    for (point, _) in path_a {
+        if path_b.contains_key(&point) {
+            intersections.push(point);
+        }
+    }
+
+    let origin = Point { x: 0, y: 0 };
+    intersections
+        .iter()
+        .map(|point| point.manhattan_distance(&origin))
+        .min()
+        .unwrap()
+}
+
+#[aoc(day3, part2)]
+pub fn shortest_signal_time(wires: &(String, String)) -> i32 {
+    let path_a = wire_path(&wires.0);
+    let path_b = wire_path(&wires.1);
+
+    let mut intersections = Vec::new();
+    for (point, signal_time) in path_a {
+        if path_b.contains_key(&point) {
+            intersections.push(signal_time + path_b.get(&point).unwrap());
+        }
+    }
+
+    *intersections.iter().min().unwrap()
+}
 #[derive(Debug, Eq, PartialEq, Hash)]
 struct Point {
     x: i32,
@@ -52,76 +92,28 @@ fn wire_path(path: &str) -> HashMap<Point, i32> {
     result
 }
 
-pub fn shortest_cross(wire_a: &str, wire_b: &str) -> i32 {
-    let path_a = wire_path(wire_a);
-    let path_b = wire_path(wire_b);
-
-    let mut intersections = Vec::new();
-    for (point, _) in path_a {
-        if path_b.contains_key(&point) {
-            intersections.push(point);
-        }
-    }
-
-    let origin = Point { x: 0, y: 0 };
-    intersections
-        .iter()
-        .map(|point| point.manhattan_distance(&origin))
-        .min()
-        .unwrap()
-}
-
-pub fn shortest_signal_time(wire_a: &str, wire_b: &str) -> i32 {
-    let path_a = wire_path(wire_a);
-    let path_b = wire_path(wire_b);
-
-    let mut intersections = Vec::new();
-    for (point, signal_time) in path_a {
-        if path_b.contains_key(&point) {
-            intersections.push(signal_time + path_b.get(&point).unwrap());
-        }
-    }
-
-    *intersections.iter().min().unwrap()
-}
-
 #[cfg(test)]
 mod tests {
     #[test]
     fn test_shortest_cross() {
-        let input_1_a = "R75,D30,R83,U83,L12,D49,R71,U7,L72";
-        let input_1_b = "U62,R66,U55,R34,D71,R55,D58,R83";
-        assert_eq!(super::shortest_cross(input_1_a, input_1_b), 159);
+        let input_1_a = "R75,D30,R83,U83,L12,D49,R71,U7,L72".to_owned();
+        let input_1_b = "U62,R66,U55,R34,D71,R55,D58,R83".to_owned();
+        assert_eq!(super::shortest_cross(&(input_1_a, input_1_b)), 159);
 
-        let input_2_a = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51";
-        let input_2_b = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7";
-        assert_eq!(super::shortest_cross(input_2_a, input_2_b), 135);
-
-        let real_input = crate::utils::read_lines("data/day03.txt").unwrap();
-        assert_eq!(super::shortest_cross(&real_input[0], &real_input[1]), 865);
+        let input_2_a = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51".to_owned();
+        let input_2_b = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7".to_owned();
+        assert_eq!(super::shortest_cross(&(input_2_a, input_2_b)), 135);
     }
 
     #[test]
     fn test_shortest_signal_time() {
-        let input_1_a = "R75,D30,R83,U83,L12,D49,R71,U7,L72";
-        let input_1_b = "U62,R66,U55,R34,D71,R55,D58,R83";
-        assert_eq!(super::shortest_signal_time(input_1_a, input_1_b), 610);
+        let input_1_a = "R75,D30,R83,U83,L12,D49,R71,U7,L72".to_owned();
+        let input_1_b = "U62,R66,U55,R34,D71,R55,D58,R83".to_owned();
+        assert_eq!(super::shortest_signal_time(&(input_1_a, input_1_b)), 610);
 
         // I don't know why this doesn't work.
-        // let input_2_a = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51";
-        // let input_2_b = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7";
-        // assert_eq!(super::shortest_signal_time(input_2_a, input_2_b), 410);
-
-        let real_input = crate::utils::read_lines("data/day03.txt").unwrap();
-        assert_eq!(
-            super::shortest_signal_time(&real_input[0], &real_input[1]),
-            35038
-        );
-    }
-
-    #[test]
-    fn test_wire_path() {
-        let input = "R75,D30,R83,U83,L12,D49,R71,U7,L72";
-        super::wire_path(input);
+        // let input_2_a = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51".to_owned();
+        // let input_2_b = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7".to_owned();
+        // assert_eq!(super::shortest_signal_time(&(input_2_a, input_2_b)), 410);
     }
 }

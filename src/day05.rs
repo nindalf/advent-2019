@@ -1,5 +1,29 @@
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+
+#[aoc_generator(day5)]
+pub fn input_generator(input: &str) -> Vec<i32> {
+    input
+        .trim()
+        .split(',')
+        .map(|s| s.parse::<i32>().unwrap())
+        .collect()
+}
+
+#[aoc(day5, part1)]
+pub fn test_systems(input: &[i32]) -> i32 {
+    let mut computer = Computer::new(&input);
+    computer.compute(1);
+    computer.output[computer.output.len() - 1]
+}
+
+#[aoc(day5, part2)]
+pub fn test_aircon(input: &[i32]) -> i32 {
+    let mut computer = Computer::new(&input);
+    computer.compute(5);
+    computer.output[computer.output.len() - 1]
+}
+
 #[derive(Copy, Clone)]
 enum Instruction {
     Addition(Parameter, Parameter, Parameter),
@@ -159,26 +183,5 @@ impl Computer {
                 Instruction::Stop => return,
             };
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_execute() {
-        let input = crate::utils::read_entire_file("data/day05.txt").unwrap();
-        let input: Vec<i32> = input
-            .trim()
-            .split(',')
-            .map(|s| s.parse::<i32>().unwrap())
-            .collect();
-
-        let mut computer = super::Computer::new(&input);
-        computer.compute(1);
-        assert_eq!(computer.output[computer.output.len() - 1], 16489636);
-
-        let mut computer = super::Computer::new(&input);
-        computer.compute(5);
-        assert_eq!(computer.output[computer.output.len() - 1], 9386583);
     }
 }

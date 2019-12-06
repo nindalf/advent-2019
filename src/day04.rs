@@ -1,4 +1,17 @@
-pub fn number_of_passwords(start: i32, end: i32, password_validator: &dyn Fn(i32) -> bool) -> i32 {
+#[aoc(day4, part1)]
+pub fn passwords_1(input: &str) -> i32 {
+    number_of_passwords(input, &is_valid_password_1)
+}
+
+#[aoc(day4, part2)]
+pub fn passwords_2(input: &str) -> i32 {
+    number_of_passwords(input, &is_valid_password_2)
+}
+
+pub fn number_of_passwords(input: &str, password_validator: &dyn Fn(i32) -> bool) -> i32 {
+    let mut parts = input.split('-');
+    let start: i32 = parts.next().unwrap().parse().unwrap();
+    let end: i32 = parts.next().unwrap().parse().unwrap();
     let mut result = 0;
     for i in start..=end {
         if password_validator(i) {
@@ -8,12 +21,12 @@ pub fn number_of_passwords(start: i32, end: i32, password_validator: &dyn Fn(i32
     result
 }
 
-pub fn is_valid_password(password: i32) -> bool {
+fn is_valid_password_1(password: i32) -> bool {
     let digits = split_digits(password);
     doublet_exists(&digits) && is_increasing(&digits)
 }
 
-pub fn is_valid_password_2(password: i32) -> bool {
+fn is_valid_password_2(password: i32) -> bool {
     let digits = split_digits(password);
     exact_doublet_exists(&digits) && is_increasing(&digits)
 }
@@ -77,10 +90,10 @@ fn exact_doublet_exists(digits: &[i32]) -> bool {
 mod tests {
     #[test]
     fn test_valid_password() {
-        assert_eq!(super::is_valid_password(111111), true);
-        assert_eq!(super::is_valid_password(122345), true);
-        assert_eq!(super::is_valid_password(223450), false);
-        assert_eq!(super::is_valid_password(123789), false);
+        assert_eq!(super::is_valid_password_1(111111), true);
+        assert_eq!(super::is_valid_password_1(122345), true);
+        assert_eq!(super::is_valid_password_1(223450), false);
+        assert_eq!(super::is_valid_password_1(123789), false);
     }
 
     #[test]
@@ -94,17 +107,5 @@ mod tests {
         assert_eq!(super::is_valid_password_2(223450), false);
         assert_eq!(super::is_valid_password_2(123789), false);
         assert_eq!(super::is_valid_password_2(555789), false);
-    }
-
-    #[test]
-    fn test_num_passwords() {
-        assert_eq!(
-            super::number_of_passwords(278384, 824795, &super::is_valid_password),
-            921
-        );
-        assert_eq!(
-            super::number_of_passwords(278384, 824795, &super::is_valid_password_2),
-            603
-        );
     }
 }
