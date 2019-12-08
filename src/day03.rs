@@ -1,10 +1,9 @@
-use std::cmp;
 use std::collections::HashMap;
 use std::str::FromStr;
 
 #[aoc_generator(day3)]
 pub fn input_generator(input: &str) -> (String, String) {
-    let lines: Vec<&str> = input.lines().collect();
+    let lines: Vec<&str> = input.lines().map(|s| s.trim()).collect();
     (lines[0].to_owned(), lines[1].to_owned())
 }
 
@@ -55,32 +54,28 @@ impl Point {
 }
 
 fn wire_path(path: &str) -> HashMap<Point, i32> {
-    let directions = path.split(',');
     let mut result: HashMap<Point, i32> = HashMap::new();
-
     let (mut x, mut y) = (0, 0);
     let mut total_distance = 0;
-    for direction in directions {
-        let mut chars = direction.chars();
-        let d: char = chars.next().unwrap();
-        let distance = i32::from_str(&direction[1..]).unwrap();
-        let (mut end_x, mut end_y) = (x, y);
-        match d {
-            'R' => end_x += distance,
-            'U' => end_y += distance,
-            'D' => end_y -= distance,
-            'L' => end_x -= distance,
+    
+    let movements = path.split(',');
+    for movement in movements {
+        let distance = i32::from_str(&movement[1..]).unwrap();
+        let (direction, end_x, end_y) = match movement.chars().next().unwrap() {
+            'R' => (1, x+distance, y),
+            'U' => (1, x, y+distance),
+            'D' => (-1, x, y-distance),
+            'L' => (-1, x-distance, y),
             _ => panic!("Unknown direction"),
-        }
-        let start_x = cmp::min(x, end_x);
-        let start_y = cmp::min(y, end_y);
-        for i in start_x..=cmp::max(x, end_x) {
-            for j in start_y..=cmp::max(y, end_y) {
+        };
+
+        for i in range(x, end_x, direction) {
+            for j in range(y, end_y, direction) {
                 let point = Point { x: i, y: j };
                 if result.contains_key(&point) {
                     continue;
                 }
-                let current_distance = i32::abs(start_x - i) + i32::abs(start_y - j);
+                let current_distance = i32::abs(x - i) + i32::abs(y - j);
                 result.insert(point, total_distance + current_distance);
             }
         }
@@ -92,28 +87,34 @@ fn wire_path(path: &str) -> HashMap<Point, i32> {
     result
 }
 
+fn range(start:i32, end:i32, direction: i32) -> Box<dyn Iterator<Item=i32>> {
+    if direction > 0 {
+        return Box::new(start..=end)
+    }
+    Box::new((end..=start).rev())
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
     fn test_shortest_cross() {
-        let input_1_a = "R75,D30,R83,U83,L12,D49,R71,U7,L72".to_owned();
-        let input_1_b = "U62,R66,U55,R34,D71,R55,D58,R83".to_owned();
-        assert_eq!(super::shortest_cross(&(input_1_a, input_1_b)), 159);
+        let input = super::input_generator("R75,D30,R83,U83,L12,D49,R71,U7,L72
+        U62,R66,U55,R34,D71,R55,D58,R83");
+        assert_eq!(super::shortest_cross(&input), 159);
 
-        let input_2_a = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51".to_owned();
-        let input_2_b = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7".to_owned();
-        assert_eq!(super::shortest_cross(&(input_2_a, input_2_b)), 135);
+        let input = super::input_generator("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
+        U98,R91,D20,R16,D67,R40,U7,R15,U6,R7");
+        assert_eq!(super::shortest_cross(&input), 135);
     }
 
     #[test]
     fn test_shortest_signal_time() {
-        let input_1_a = "R75,D30,R83,U83,L12,D49,R71,U7,L72".to_owned();
-        let input_1_b = "U62,R66,U55,R34,D71,R55,D58,R83".to_owned();
-        assert_eq!(super::shortest_signal_time(&(input_1_a, input_1_b)), 610);
+        let input = super::input_generator("R75,D30,R83,U83,L12,D49,R71,U7,L72
+        U62,R66,U55,R34,D71,R55,D58,R83");
+        assert_eq!(super::shortest_signal_time(&input), 610);
 
-        // I don't know why this doesn't work.
-        // let input_2_a = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51".to_owned();
-        // let input_2_b = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7".to_owned();
-        // assert_eq!(super::shortest_signal_time(&(input_2_a, input_2_b)), 410);
+        let input = super::input_generator("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
+        U98,R91,D20,R16,D67,R40,U7,R15,U6,R7");
+        assert_eq!(super::shortest_signal_time(&input), 410);
     }
 }
