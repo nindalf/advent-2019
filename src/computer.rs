@@ -47,9 +47,6 @@ enum Parameter {
 pub struct Computer {
     instructions: Vec<i64>,
     counter: usize,
-    op_1: i64,
-    op_2: i64,
-    op_3: i64,
     relative_base: i64,
     extended_memory: HashMap<i64, i64>,
 }
@@ -59,9 +56,6 @@ impl Computer {
         Computer {
             instructions: instructions.to_vec(),
             counter: 0,
-            op_1: 0,
-            op_2: 0,
-            op_3: 0,
             relative_base: 0,
             extended_memory: HashMap::new(),
         }
@@ -70,39 +64,6 @@ impl Computer {
     fn next_instruction(&mut self) -> Option<Instruction> {
         let instruction = Instruction::new(self.instructions[self.counter]);
         self.counter += 1;
-        match instruction {
-            Some(instruction) => match instruction {
-                Instruction::Addition(param_1, param_2, param_3) => {
-                    self.compute_three_operands(param_1, param_2, param_3)
-                }
-                Instruction::Multiplication(param_1, param_2, param_3) => {
-                    self.compute_three_operands(param_1, param_2, param_3)
-                }
-                Instruction::Input(param_1) => {
-                    self.compute_one_operand(param_1);
-                }
-                Instruction::Output(param_1) => {
-                    self.compute_one_operand(param_1);
-                }
-                Instruction::JumpIfTrue(param_1, param_2) => {
-                    self.compute_two_operands(param_1, param_2)
-                }
-                Instruction::JumpIfFalse(param_1, param_2) => {
-                    self.compute_two_operands(param_1, param_2)
-                }
-                Instruction::LessThan(param_1, param_2, param_3) => {
-                    self.compute_three_operands(param_1, param_2, param_3)
-                }
-                Instruction::Equals(param_1, param_2, param_3) => {
-                    self.compute_three_operands(param_1, param_2, param_3)
-                }
-                Instruction::AdjustRelativeBase(param_1) => {
-                    self.compute_one_operand(param_1);
-                }
-                Instruction::Stop => {}
-            },
-            None => {}
-        };
         instruction
     }
 
@@ -111,19 +72,21 @@ impl Computer {
         param_1: Parameter,
         param_2: Parameter,
         param_3: Parameter,
-    ) {
-        self.op_1 = self.compute_operand(param_1);
-        self.op_2 = self.compute_operand(param_2);
-        self.op_3 = self.compute_operand(param_3)
+    ) -> (i64, i64, i64) {
+        let op_1 = self.compute_operand(param_1);
+        let op_2 = self.compute_operand(param_2);
+        let op_3 = self.compute_operand(param_3);
+        (op_1, op_2, op_3)
     }
 
-    fn compute_two_operands(&mut self, param_1: Parameter, param_2: Parameter) {
-        self.op_1 = self.compute_operand(param_1);
-        self.op_2 = self.compute_operand(param_2);
+    fn compute_two_operands(&mut self, param_1: Parameter, param_2: Parameter) -> (i64, i64) {
+        let op_1 = self.compute_operand(param_1);
+        let op_2 = self.compute_operand(param_2);
+        (op_1, op_2)
     }
 
-    fn compute_one_operand(&mut self, param_1: Parameter) {
-        self.op_1 = self.compute_operand(param_1);
+    fn compute_one_operand(&mut self, param_1: Parameter) -> i64 {
+        self.compute_operand(param_1)
     }
 
     fn compute_operand(&mut self, parameter: Parameter) -> i64 {
@@ -161,51 +124,60 @@ impl Computer {
         let mut input_counter = 0;
         while let Some(instruction) = self.next_instruction() {
             match instruction {
-                Instruction::Addition(_, _, _) => {
+                Instruction::Addition(param_1, param_2, param_3) => {
+                    let (op_1, op_2, op_3) = self.compute_three_operands(param_1, param_2, param_3);
                     self.write_memory(
-                        self.op_3,
-                        self.read_memory(self.op_1) + self.read_memory(self.op_2),
+                        op_3,
+                        self.read_memory(op_1) + self.read_memory(op_2),
                     );
                 }
-                Instruction::Multiplication(_, _, _) => {
+                Instruction::Multiplication(param_1, param_2, param_3) => {
+                    let (op_1, op_2, op_3) = self.compute_three_operands(param_1, param_2, param_3);
                     self.write_memory(
-                        self.op_3,
-                        self.read_memory(self.op_1) * self.read_memory(self.op_2),
+                        op_3,
+                        self.read_memory(op_1) * self.read_memory(op_2),
                     );
                 }
-                Instruction::Input(_) => {
-                    self.write_memory(self.op_1, input[input_counter]);
+                Instruction::Input(param) => {
+                    let op_1 = self.compute_one_operand(param);
+                    self.write_memory(op_1, input[input_counter]);
                     input_counter += 1;
                 }
-                Instruction::Output(_) => {
-                    return Some(self.read_memory(self.op_1));
+                Instruction::Output(param) => {
+                    let op_1 = self.compute_one_operand(param);
+                    return Some(self.read_memory(op_1));
                 }
-                Instruction::JumpIfTrue(_, _) => {
-                    if self.read_memory(self.op_1) != 0 {
-                        self.counter = self.read_memory(self.op_2) as usize;
+                Instruction::JumpIfTrue(param_1, param_2) => {
+                    let (op_1, op_2) = self.compute_two_operands(param_1, param_2);
+                    if self.read_memory(op_1) != 0 {
+                        self.counter = self.read_memory(op_2) as usize;
                     }
                 }
-                Instruction::JumpIfFalse(_, _) => {
-                    if self.read_memory(self.op_1) == 0 {
-                        self.counter = self.read_memory(self.op_2) as usize;
+                Instruction::JumpIfFalse(param_1, param_2) => {
+                    let (op_1, op_2) = self.compute_two_operands(param_1, param_2);
+                    if self.read_memory(op_1) == 0 {
+                        self.counter = self.read_memory(op_2) as usize;
                     }
                 }
-                Instruction::LessThan(_, _, _) => {
-                    if self.read_memory(self.op_1) < self.read_memory(self.op_2) {
-                        self.write_memory(self.op_3, 1);
+                Instruction::LessThan(param_1, param_2, param_3) => {
+                    let (op_1, op_2, op_3) = self.compute_three_operands(param_1, param_2, param_3);
+                    if self.read_memory(op_1) < self.read_memory(op_2) {
+                        self.write_memory(op_3, 1);
                     } else {
-                        self.write_memory(self.op_3, 0);
+                        self.write_memory(op_3, 0);
                     }
                 }
-                Instruction::Equals(_, _, _) => {
-                    if self.read_memory(self.op_1) == self.read_memory(self.op_2) {
-                        self.write_memory(self.op_3, 1);
+                Instruction::Equals(param_1, param_2, param_3) => {
+                    let (op_1, op_2, op_3) = self.compute_three_operands(param_1, param_2, param_3);
+                    if self.read_memory(op_1) == self.read_memory(op_2) {
+                        self.write_memory(op_3, 1);
                     } else {
-                        self.write_memory(self.op_3, 0);
+                        self.write_memory(op_3, 0);
                     }
                 }
-                Instruction::AdjustRelativeBase(_) => {
-                    self.relative_base += self.read_memory(self.op_1);
+                Instruction::AdjustRelativeBase(param) => {
+                    let op_1 = self.compute_one_operand(param);
+                    self.relative_base += self.read_memory(op_1);
                 }
                 Instruction::Stop => {
                     return None;
