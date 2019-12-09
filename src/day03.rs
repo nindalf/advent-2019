@@ -57,15 +57,15 @@ fn wire_path(path: &str) -> HashMap<Point, i32> {
     let mut result: HashMap<Point, i32> = HashMap::new();
     let (mut x, mut y) = (0, 0);
     let mut total_distance = 0;
-    
+
     let movements = path.split(',');
     for movement in movements {
         let distance = i32::from_str(&movement[1..]).unwrap();
         let (direction, end_x, end_y) = match movement.chars().next().unwrap() {
-            'R' => (1, x+distance, y),
-            'U' => (1, x, y+distance),
-            'D' => (-1, x, y-distance),
-            'L' => (-1, x-distance, y),
+            'R' => (1, x + distance, y),
+            'U' => (1, x, y + distance),
+            'D' => (-1, x, y - distance),
+            'L' => (-1, x - distance, y),
             _ => panic!("Unknown direction"),
         };
 
@@ -87,9 +87,9 @@ fn wire_path(path: &str) -> HashMap<Point, i32> {
     result
 }
 
-fn range(start:i32, end:i32, direction: i32) -> Box<dyn Iterator<Item=i32>> {
+fn range(start: i32, end: i32, direction: i32) -> Box<dyn Iterator<Item = i32>> {
     if direction > 0 {
-        return Box::new(start..=end)
+        return Box::new(start..=end);
     }
     Box::new((end..=start).rev())
 }
@@ -98,23 +98,31 @@ fn range(start:i32, end:i32, direction: i32) -> Box<dyn Iterator<Item=i32>> {
 mod tests {
     #[test]
     fn test_shortest_cross() {
-        let input = super::input_generator("R75,D30,R83,U83,L12,D49,R71,U7,L72
-        U62,R66,U55,R34,D71,R55,D58,R83");
+        let input = super::input_generator(
+            "R75,D30,R83,U83,L12,D49,R71,U7,L72
+        U62,R66,U55,R34,D71,R55,D58,R83",
+        );
         assert_eq!(super::shortest_cross(&input), 159);
 
-        let input = super::input_generator("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
-        U98,R91,D20,R16,D67,R40,U7,R15,U6,R7");
+        let input = super::input_generator(
+            "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
+        U98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
+        );
         assert_eq!(super::shortest_cross(&input), 135);
     }
 
     #[test]
     fn test_shortest_signal_time() {
-        let input = super::input_generator("R75,D30,R83,U83,L12,D49,R71,U7,L72
-        U62,R66,U55,R34,D71,R55,D58,R83");
+        let input = super::input_generator(
+            "R75,D30,R83,U83,L12,D49,R71,U7,L72
+        U62,R66,U55,R34,D71,R55,D58,R83",
+        );
         assert_eq!(super::shortest_signal_time(&input), 610);
 
-        let input = super::input_generator("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
-        U98,R91,D20,R16,D67,R40,U7,R15,U6,R7");
+        let input = super::input_generator(
+            "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
+        U98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
+        );
         assert_eq!(super::shortest_signal_time(&input), 410);
     }
 }

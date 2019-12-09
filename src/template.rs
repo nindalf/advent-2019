@@ -24,21 +24,14 @@ fn helper() {}
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_helper() {
-        
-    }
+    fn test_helper() {}
 
     #[test]
-    fn test_part1() {
-        
-    }
+    fn test_part1() {}
 
     #[test]
-    fn test_part2() {
-        
-    }
+    fn test_part2() {}
 }
-
 
 use once_cell::sync::Lazy;
 use std::sync::Mutex;

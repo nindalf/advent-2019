@@ -3,16 +3,16 @@ use itertools::Itertools;
 use std::cmp;
 
 #[aoc_generator(day7)]
-pub fn input_generator(input: &str) -> Vec<i32> {
+pub fn input_generator(input: &str) -> Vec<i64> {
     input
         .trim()
         .split(',')
-        .map(|s| s.parse::<i32>().unwrap())
+        .map(|s| s.parse::<i64>().unwrap())
         .collect()
 }
 
 #[aoc(day7, part1)]
-pub fn max_signal(input: &[i32]) -> i32 {
+pub fn max_signal(input: &[i64]) -> i64 {
     let mut max_output = 0;
     for settings in (0..5).permutations(5) {
         let mut prev_output = 0;
@@ -26,7 +26,7 @@ pub fn max_signal(input: &[i32]) -> i32 {
 }
 
 #[aoc(day7, part2)]
-pub fn feedback_max_signal(input: &[i32]) -> i32 {
+pub fn feedback_max_signal(input: &[i64]) -> i64 {
     let mut max_output = 0;
     for settings in (5..10).permutations(5) {
         let mut prev_output = 0;
