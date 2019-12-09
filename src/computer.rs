@@ -46,7 +46,7 @@ enum Parameter {
 
 pub struct Computer {
     instructions: Vec<i64>,
-    counter: usize,
+    counter: i64,
     relative_base: i64,
     extended_memory: HashMap<i64, i64>,
 }
@@ -62,7 +62,7 @@ impl Computer {
     }
 
     fn next_instruction(&mut self) -> Option<Instruction> {
-        let instruction = Instruction::new(self.instructions[self.counter]);
+        let instruction = Instruction::new(self.read_memory(self.counter));
         self.counter += 1;
         instruction
     }
@@ -91,9 +91,9 @@ impl Computer {
 
     fn compute_operand(&mut self, parameter: Parameter) -> i64 {
         let op = match parameter {
-            Parameter::Position => self.read_memory(self.counter as i64),
-            Parameter::Immediate => self.counter as i64,
-            Parameter::Relative => self.relative_base + self.read_memory(self.counter as i64),
+            Parameter::Position => self.read_memory(self.counter),
+            Parameter::Immediate => self.counter,
+            Parameter::Relative => self.relative_base + self.read_memory(self.counter),
         };
         self.counter += 1;
         op
@@ -150,13 +150,13 @@ impl Computer {
                 Instruction::JumpIfTrue(param_1, param_2) => {
                     let (op_1, op_2) = self.compute_two_operands(param_1, param_2);
                     if self.read_memory(op_1) != 0 {
-                        self.counter = self.read_memory(op_2) as usize;
+                        self.counter = self.read_memory(op_2);
                     }
                 }
                 Instruction::JumpIfFalse(param_1, param_2) => {
                     let (op_1, op_2) = self.compute_two_operands(param_1, param_2);
                     if self.read_memory(op_1) == 0 {
-                        self.counter = self.read_memory(op_2) as usize;
+                        self.counter = self.read_memory(op_2);
                     }
                 }
                 Instruction::LessThan(param_1, param_2, param_3) => {
