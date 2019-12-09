@@ -46,12 +46,10 @@ enum Parameter {
 
 pub struct Computer {
     instructions: Vec<i64>,
-    output: i64,
     counter: usize,
     op_1: i64,
     op_2: i64,
     destination: i64,
-    halted: bool,
     relative_base: i64,
     extended_memory: HashMap<i64, i64>,
 }
@@ -60,19 +58,13 @@ impl Computer {
     pub fn new(instructions: &[i64]) -> Computer {
         Computer {
             instructions: instructions.to_vec(),
-            output: 0,
             counter: 0,
             op_1: 0,
             op_2: 0,
             destination: 0,
-            halted: false,
             relative_base: 0,
             extended_memory: HashMap::new(),
         }
-    }
-
-    pub fn is_halted(&self) -> bool {
-        self.halted
     }
 
     fn next_instruction(&mut self) -> Option<Instruction> {
@@ -90,7 +82,7 @@ impl Computer {
                     self.destination = self.compute_operand(param_1);
                 }
                 Instruction::Output(param_1) => {
-                    self.destination = self.compute_operand(param_1);
+                    self.op_1 = self.compute_operand(param_1);
                 }
                 Instruction::JumpIfTrue(param_1, param_2) => {
                     self.compute_two_operands(param_1, param_2)
@@ -161,7 +153,7 @@ impl Computer {
         self.extended_memory.insert(location, val);
     }
 
-    pub fn compute(&mut self, input: &[i64]) -> i64 {
+    pub fn compute(&mut self, input: &[i64]) -> Option<i64> {
         let mut input_counter = 0;
         while let Some(instruction) = self.next_instruction() {
             match instruction {
@@ -182,8 +174,7 @@ impl Computer {
                     input_counter += 1;
                 }
                 Instruction::Output(_) => {
-                    self.output = self.read_memory(self.destination);
-                    return self.output;
+                    return Some( self.read_memory(self.op_1));
                 }
                 Instruction::JumpIfTrue(_, _) => {
                     if self.read_memory(self.op_1) != 0 {
@@ -213,11 +204,10 @@ impl Computer {
                     self.relative_base += self.read_memory(self.op_1);
                 }
                 Instruction::Stop => {
-                    self.halted = true;
-                    return self.output;
+                    return None;
                 }
             };
         }
-        self.output
+        None
     }
 }

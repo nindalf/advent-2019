@@ -22,14 +22,10 @@ pub fn distress_signal(input: &[i64]) -> i64 {
 pub fn compute(instructions: &[i64], input: &[i64]) -> Vec<i64> {
     let mut computer = Computer::new(instructions);
     let mut result = Vec::new();
-    let mut output = computer.compute(input);
-    result.push(output);
-    while !computer.is_halted() {
-        output = computer.compute(&vec![]);
-        // TODO fix this hack
-        if !computer.is_halted() {
-            result.push(output);
-        }
+    let output = computer.compute(input);
+    result.push(output.unwrap());
+    while let Some(output) = computer.compute(&vec![]) {
+        result.push(output);
     }
     result
 }

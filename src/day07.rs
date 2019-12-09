@@ -18,7 +18,7 @@ pub fn max_signal(input: &[i64]) -> i64 {
         let mut prev_output = 0;
         for setting in settings {
             let mut amplifier = Computer::new(&input);
-            prev_output = amplifier.compute(&vec![setting, prev_output]);
+            prev_output = amplifier.compute(&vec![setting, prev_output]).unwrap();
         }
         max_output = cmp::max(max_output, prev_output);
     }
@@ -34,15 +34,16 @@ pub fn feedback_max_signal(input: &[i64]) -> i64 {
         // initialize
         for setting in settings {
             let mut amplifier = Computer::new(&input);
-            prev_output = amplifier.compute(&vec![setting, prev_output]);
+            prev_output = amplifier.compute(&vec![setting, prev_output]).unwrap();
             amplifiers.push(amplifier);
         }
         for i in 0.. {
             let current_amplifier = &mut amplifiers[i % 5];
-            if current_amplifier.is_halted() {
-                break;
+            let next_output = current_amplifier.compute(&vec![prev_output]);
+            if next_output.is_none() {
+                break
             }
-            prev_output = current_amplifier.compute(&vec![prev_output]);
+            prev_output = next_output.unwrap();
         }
         max_output = cmp::max(max_output, prev_output);
     }
