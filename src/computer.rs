@@ -85,10 +85,6 @@ impl Computer {
         (op_1, op_2)
     }
 
-    fn compute_one_operand(&mut self, param_1: Parameter) -> i64 {
-        self.compute_operand(param_1)
-    }
-
     fn compute_operand(&mut self, parameter: Parameter) -> i64 {
         let op = match parameter {
             Parameter::Position => self.read_memory(self.counter),
@@ -139,12 +135,12 @@ impl Computer {
                     );
                 }
                 Instruction::Input(param) => {
-                    let op_1 = self.compute_one_operand(param);
+                    let op_1 = self.compute_operand(param);
                     self.write_memory(op_1, input[input_counter]);
                     input_counter += 1;
                 }
                 Instruction::Output(param) => {
-                    let op_1 = self.compute_one_operand(param);
+                    let op_1 = self.compute_operand(param);
                     return Some(self.read_memory(op_1));
                 }
                 Instruction::JumpIfTrue(param_1, param_2) => {
@@ -176,7 +172,7 @@ impl Computer {
                     }
                 }
                 Instruction::AdjustRelativeBase(param) => {
-                    let op_1 = self.compute_one_operand(param);
+                    let op_1 = self.compute_operand(param);
                     self.relative_base += self.read_memory(op_1);
                 }
                 Instruction::Stop => {
