@@ -49,7 +49,7 @@ pub struct Computer {
     counter: usize,
     op_1: i64,
     op_2: i64,
-    destination: i64,
+    op_3: i64,
     relative_base: i64,
     extended_memory: HashMap<i64, i64>,
 }
@@ -61,7 +61,7 @@ impl Computer {
             counter: 0,
             op_1: 0,
             op_2: 0,
-            destination: 0,
+            op_3: 0,
             relative_base: 0,
             extended_memory: HashMap::new(),
         }
@@ -73,16 +73,16 @@ impl Computer {
         match instruction {
             Some(instruction) => match instruction {
                 Instruction::Addition(param_1, param_2, param_3) => {
-                    self.compute_two_operands_and_destination(param_1, param_2, param_3)
+                    self.compute_three_operands(param_1, param_2, param_3)
                 }
                 Instruction::Multiplication(param_1, param_2, param_3) => {
-                    self.compute_two_operands_and_destination(param_1, param_2, param_3)
+                    self.compute_three_operands(param_1, param_2, param_3)
                 }
                 Instruction::Input(param_1) => {
-                    self.destination = self.compute_operand(param_1);
+                    self.compute_one_operand(param_1);
                 }
                 Instruction::Output(param_1) => {
-                    self.op_1 = self.compute_operand(param_1);
+                    self.compute_one_operand(param_1);
                 }
                 Instruction::JumpIfTrue(param_1, param_2) => {
                     self.compute_two_operands(param_1, param_2)
@@ -91,13 +91,13 @@ impl Computer {
                     self.compute_two_operands(param_1, param_2)
                 }
                 Instruction::LessThan(param_1, param_2, param_3) => {
-                    self.compute_two_operands_and_destination(param_1, param_2, param_3)
+                    self.compute_three_operands(param_1, param_2, param_3)
                 }
                 Instruction::Equals(param_1, param_2, param_3) => {
-                    self.compute_two_operands_and_destination(param_1, param_2, param_3)
+                    self.compute_three_operands(param_1, param_2, param_3)
                 }
                 Instruction::AdjustRelativeBase(param_1) => {
-                    self.op_1 = self.compute_operand(param_1);
+                    self.compute_one_operand(param_1);
                 }
                 Instruction::Stop => {}
             },
@@ -106,7 +106,7 @@ impl Computer {
         instruction
     }
 
-    fn compute_two_operands_and_destination(
+    fn compute_three_operands(
         &mut self,
         param_1: Parameter,
         param_2: Parameter,
@@ -114,12 +114,16 @@ impl Computer {
     ) {
         self.op_1 = self.compute_operand(param_1);
         self.op_2 = self.compute_operand(param_2);
-        self.destination = self.compute_operand(param_3)
+        self.op_3 = self.compute_operand(param_3)
     }
 
     fn compute_two_operands(&mut self, param_1: Parameter, param_2: Parameter) {
         self.op_1 = self.compute_operand(param_1);
         self.op_2 = self.compute_operand(param_2);
+    }
+
+    fn compute_one_operand(&mut self, param_1: Parameter) {
+        self.op_1 = self.compute_operand(param_1);
     }
 
     fn compute_operand(&mut self, parameter: Parameter) -> i64 {
@@ -159,22 +163,22 @@ impl Computer {
             match instruction {
                 Instruction::Addition(_, _, _) => {
                     self.write_memory(
-                        self.destination,
+                        self.op_3,
                         self.read_memory(self.op_1) + self.read_memory(self.op_2),
                     );
                 }
                 Instruction::Multiplication(_, _, _) => {
                     self.write_memory(
-                        self.destination,
+                        self.op_3,
                         self.read_memory(self.op_1) * self.read_memory(self.op_2),
                     );
                 }
                 Instruction::Input(_) => {
-                    self.write_memory(self.destination, input[input_counter]);
+                    self.write_memory(self.op_1, input[input_counter]);
                     input_counter += 1;
                 }
                 Instruction::Output(_) => {
-                    return Some( self.read_memory(self.op_1));
+                    return Some(self.read_memory(self.op_1));
                 }
                 Instruction::JumpIfTrue(_, _) => {
                     if self.read_memory(self.op_1) != 0 {
@@ -188,16 +192,16 @@ impl Computer {
                 }
                 Instruction::LessThan(_, _, _) => {
                     if self.read_memory(self.op_1) < self.read_memory(self.op_2) {
-                        self.write_memory(self.destination, 1);
+                        self.write_memory(self.op_3, 1);
                     } else {
-                        self.write_memory(self.destination, 0);
+                        self.write_memory(self.op_3, 0);
                     }
                 }
                 Instruction::Equals(_, _, _) => {
                     if self.read_memory(self.op_1) == self.read_memory(self.op_2) {
-                        self.write_memory(self.destination, 1);
+                        self.write_memory(self.op_3, 1);
                     } else {
-                        self.write_memory(self.destination, 0);
+                        self.write_memory(self.op_3, 0);
                     }
                 }
                 Instruction::AdjustRelativeBase(_) => {
