@@ -15,7 +15,6 @@ pub fn test_systems(input: &[i64]) -> i64 {
     let mut output = computer.compute(&vec![1]).unwrap();
     
     while let Some(new_output) = computer.compute(&vec![]) {
-        println!("Day 5 needs additional loops");
         output = new_output;
     }
     output
