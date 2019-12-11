@@ -91,31 +91,31 @@ fn is_visible(input: &Vec<Vec<i32>>, start_x: i32, start_y: i32, other_x: i32, o
 }
 
 fn find_kth_destroyed_asteroid(_input: &Vec<Vec<i32>>, _k: i32) -> i32 {
-    // let best_asteroid = best_asteroid(&input).0;
-    // let right_asteroids: BTreeMap<f64, Vec<Point>> = BTreeMap::new();
-    // let left_asteroids: BTreeMap<f64, Vec<Point>> = BTreeMap::new();
-    // for y in 0..input.len() {
-    //     for x in 0..input[0].len() {
-    //         if input[y][x] == -1 {
-    //             let (y_diff, x_diff) = ((y - best_asteroid.y) as f64, (x - best_asteroid.x) as f64);
-    //             let slope = if x_diff != 0 {
-    //                 y_diff/x_diff
-    //             } else {
-    //                 if y_diff > 0 {std::f64::INFINITY} else {std::f64::NEG_INFINITY}
-    //             };
-    //             if x_diff > 0 {
-    //                 right_asteroids.entry(slope).or_insert(Vec::new()).push(Point{x: x as i32, y: y as i32});
-    //             } else {
-    //                 left_asteroids.entry(slope).or_insert(Vec::new()).push(Point{x: x as i32, y: y as i32});
-    //             }
-    //         }
-    //     }
-    // }
-    // println!("{:?}", right_asteroids);
-    // println!("{:?}", left_asteroids);
-    // for value in right_asteroids.values() {
-    //     return value.x * 100 + value.y;
-    // }
+    let best_asteroid = best_asteroid(&input).0;
+    let right_asteroids: BTreeMap<f64, Vec<Point>> = BTreeMap::new();
+    let left_asteroids: BTreeMap<f64, Vec<Point>> = BTreeMap::new();
+    for y in 0..input.len() {
+        for x in 0..input[0].len() {
+            if input[y][x] == -1 {
+                let (y_diff, x_diff) = ((y - best_asteroid.y) as f64, (x - best_asteroid.x) as f64);
+                let slope = if x_diff != 0 {
+                    y_diff/x_diff
+                } else {
+                    if y_diff > 0 {std::f64::INFINITY} else {std::f64::NEG_INFINITY}
+                };
+                if x_diff > 0 {
+                    right_asteroids.entry(slope).or_insert(Vec::new()).push(Point{x: x as i32, y: y as i32});
+                } else {
+                    left_asteroids.entry(slope).or_insert(Vec::new()).push(Point{x: x as i32, y: y as i32});
+                }
+            }
+        }
+    }
+    println!("{:?}", right_asteroids);
+    println!("{:?}", left_asteroids);
+    for value in right_asteroids.values() {
+        return value.x * 100 + value.y;
+    }
     0
 }
 
