@@ -1,3 +1,7 @@
+
+#[macro_use]
+extern crate lazy_static;
+
 pub mod computer;
 pub mod day01;
 pub mod day02;
@@ -10,7 +14,7 @@ pub mod day08;
 pub mod day09;
 pub mod day10;
 pub mod day11;
-extern crate lazy_static;
+pub mod day12;
 
 #[macro_use]
 extern crate aoc_runner_derive;

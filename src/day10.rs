@@ -12,7 +12,7 @@ pub fn input_generator(input: &str) -> Vec<Vec<i32>> {
                 if c == '.' {
                     output.push(0);
                 }
-                if c == '#' {
+                if c == '#' || c == 'X' {
                     output.push(-1)
                 }
             }
@@ -59,7 +59,7 @@ fn find_visible_asteroids(input: &Vec<Vec<i32>>, start_x: usize, start_y: usize)
     let mut result = 0;
     for other_y in 0..input.len() {
         for other_x in 0..input[0].len() {
-            // println!("{} {} {} {}", start_x, start_y, other_x, other_x);
+            println!("{} {} {} {} {}", input.len(), input[0].len(), other_x, other_y, input[other_y][other_x]);
             if input[other_y][other_x] == -1 && is_visible(&input, start_x as i32, start_y as i32, other_x as i32, other_y as i32) {
                 result += 1;
             }
@@ -90,20 +90,26 @@ fn is_visible(input: &Vec<Vec<i32>>, start_x: i32, start_y: i32, other_x: i32, o
     false
 }
 
-fn find_kth_destroyed_asteroid(_input: &Vec<Vec<i32>>, _k: i32) -> i32 {
+fn find_kth_destroyed_asteroid(input: &Vec<Vec<i32>>, k: i32) -> i32 {
     let best_asteroid = best_asteroid(&input).0;
-    let right_asteroids: BTreeMap<f64, Vec<Point>> = BTreeMap::new();
-    let left_asteroids: BTreeMap<f64, Vec<Point>> = BTreeMap::new();
+    let mut right_asteroids: BTreeMap<(i32, i32), Vec<Point>> = BTreeMap::new();
+    let mut left_asteroids: BTreeMap<(i32, i32), Vec<Point>> = BTreeMap::new();
     for y in 0..input.len() {
-        for x in 0..input[0].len() {
+        for x  in 0..input[0].len() {
+            if y as i32 == best_asteroid.y && x as i32 == best_asteroid.x {
+                continue;
+            }
             if input[y][x] == -1 {
-                let (y_diff, x_diff) = ((y - best_asteroid.y) as f64, (x - best_asteroid.x) as f64);
-                let slope = if x_diff != 0 {
-                    y_diff/x_diff
-                } else {
-                    if y_diff > 0 {std::f64::INFINITY} else {std::f64::NEG_INFINITY}
-                };
-                if x_diff > 0 {
+                let gcd = (x as i32 - best_asteroid.x).gcd(&(y as i32 - best_asteroid.y));
+                let slope_x = (x as i32 - best_asteroid.x)/gcd;
+                let slope_y = (y as i32 - best_asteroid.y)/gcd;
+                let slope = (slope_y, slope_x);
+                // let slope = if x_diff != 0.0 {
+                //     y_diff/x_diff
+                // } else {
+                //     if y_diff > 0.0 {std::f64::INFINITY} else {std::f64::NEG_INFINITY}
+                // };
+                if slope.1 > 0 {
                     right_asteroids.entry(slope).or_insert(Vec::new()).push(Point{x: x as i32, y: y as i32});
                 } else {
                     left_asteroids.entry(slope).or_insert(Vec::new()).push(Point{x: x as i32, y: y as i32});
@@ -111,11 +117,15 @@ fn find_kth_destroyed_asteroid(_input: &Vec<Vec<i32>>, _k: i32) -> i32 {
             }
         }
     }
-    println!("{:?}", right_asteroids);
+    let right_values = right_asteroids.values();
+    let left_values = left_asteroids.values();
+
+    // right_values.sort_by(|a, b| (a.y as f32/a.x as f32).partial_cmp(b.y as f32/b.x as f32).unwrap());
+    println!("{:?}", right_values);
     println!("{:?}", left_asteroids);
-    for value in right_asteroids.values() {
-        return value.x * 100 + value.y;
-    }
+    // for value in right_asteroids.values() {
+    //     return value.x * 100 + value.y;
+    // }
     0
 }
 
@@ -215,6 +225,8 @@ mod tests {
         ..#.....X...###..
         ..#.#.....#....##");
         // TODO implement and fix
+        println!("{:?}", input);
+        println!("{}", input[3][16]);
         assert_eq!(super::find_kth_destroyed_asteroid(&input, 1), 1112);
     }
 
